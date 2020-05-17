@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Mapping for vitotronic/optolink addresses to openhab things.
+
+channel id starts with '*' :
+     -    will not send to openhab but it is posible to ask for this ID on the interface.
+     -    is not implemented in openhab
+     
+Telegram types:
+	BOOLEAN = 1 Byte -> boolean
+	BYTE    = 1 Byte -> short
+	UBYTE   = 1 Byte -> short
+	SHORT   = 2 Byte -> int
+	USHORT  = 2 Byte -> int
+	INT     = 4 byte -> long
+    UINT    = 4 Byte -> long
+    DATE    = 8 Byte -> date (read only)
+    
+For more information about addresses and types see: http://openv.wikispaces.com/
+
+-->
+
+
+
+<optolink device="2098" id="V200KW2" protocol="KW">
+
+     <adapterID>Vitotronic</adapterID>       <!-- Unique ID on the Network-->
+     <tty>/dev/ttyS2</tty>                   <!-- serial port of the optolink adapter-->
+     <ttytimeout>2000</ttytimeout>           <!-- milliseconds for reading timeout tty -->
+     <port>31113</port>                      <!-- port for incoming communication. See also: http://www.iana.org -->
+
+     <!-- Addressen die von diesem 'device' unterst�tzt werden -->
+     
+     <thing type="heating" id="VC1">
+          <description>Viessmann Vitola 100</description>
+<!--          <channel  id="*systemid">
+               <description>System ID</description>
+               <telegram address="00F8" type="short"/>
+          </channel>  -->
+          <channel id="systemtime">
+               <description>System Date and Time</description>
+               <telegram address="088E" type="date" />
+          </channel>
+          <channel id="outside_temp">
+               <description>Outside Temperature</description>
+               <telegram address="0800" type="short" divider="10"/>
+          </channel>
+          <channel id="boiler_temp">
+               <description>The furnace temperature of the burner boiler</description>
+               <telegram address="0810" type="short" divider="10"/>
+          </channel>
+     </thing>
+     <!--# Puffer-StorageTank -->
+     <thing type="storagetank" id="storagetank">
+          <description>Hot Water Storage Tank an Buffer</description>
+          <channel id="hotwater_temp">
+               <description>Hot water temperatur on top of the buffer.</description>
+               <telegram  address="0804" type="short" divider="10"/>
+          </channel>
+          <channel id="circuitpump">
+               <description>Cirulation Pump for Hot Water</description>
+               <telegram  address="0846" type="boolean" />
+          </channel>
+    </thing>
+    <!--# Kessel -->
+
+    <!--# Burner - not working because oilburner is missing in OH2 addon -->
+<!--    <thing type="oilburner" id="oilburner">
+          <description>Burner</description>
+          <channel id="error">
+               <description>Burner is on error. </description>
+                <telegram address="0883" type="boolean"/>
+          </channel>
+          <channel id="starts">
+               <description>Counts the number of starts sience first start of heating. </description>
+                <telegram address="088A" type="uint"/>
+          </channel>
+          <channel id="ontimelevel1">
+               <description>On time of the burner sience first start of heating.  </description>
+                <telegram address="08A7" type="uint" divider="3600"/>
+          </channel>
+          <channel id="ontimelevel2">
+               <description>On time of the burner sience first start of heating.  </description>
+                <telegram address="08AB" type="uint" divider="3600"/>
+          </channel>
+          <channel id="consumedoil">
+               <description>Consumed Oil since start of heating in Liter. </description>
+                <telegram address="7574" type="uint" divider="1000"/>
+          </channel>
+     </thing> -->
+
+    <!--# Burner - workaround: mapping oilburner channels on pelletburner -->
+    <thing type="pelletburner" id="oilburner">
+          <description>Burner</description>
+          <channel id="error">
+               <description>Burner is on error. </description>
+                <telegram address="0883" type="boolean"/>
+          </channel>
+          <channel id="starts">
+               <description>Counts the number of starts sience first start of heating. </description>
+                <telegram address="088A" type="uint"/>
+          </channel>
+          <channel id="ontime">
+               <description>On time of the burner sience first start of heating.  </description>
+                <telegram address="08A7" type="uint" divider="3600"/>
+          </channel>
+          <channel id="consumedpellets">
+               <description>Consumed Oil since start of heating in Liter. </description>
+                <telegram address="7574" type="uint" divider="1000"/>
+          </channel>
+     </thing>
+
+    <!--# Circuit 1 -->
+    <!--# My circuit 1 has same flowtemperatur as boiler (no sensor, 2900 is zero), so mapped current room temp A1M1 RTS (0896) -->
+    <!--# If the original flowtemperatur is needed replace 0896 with 2900 again -->
+     <thing type="circuit" id="circuit1">
+          <description>Heading Circuit of the first Floor.</description>
+          <channel id="flowtemperature" >
+               <description>Flow temperature</description>
+               <telegram address="0896" type="short" divider="10"/>
+          </channel>
+          <channel id="pump">
+               <description></description>
+               <telegram address="2906" type="boolean" />
+          </channel>
+          <channel id="operationmode" >
+               <description>Operation mode (0,1,2,3,4).</description>
+               <telegram address="2301" type="byte"/>
+         </channel>
+          <channel id="savemode">
+               <description>The savemode.</description>
+               <telegram  address="2302" type="boolean"/>
+          </channel>
+          <channel id="partymode" >
+               <description>Partymode.</description>
+               <telegram address="2303" type="boolean"/>
+         </channel>
+         <channel id="party_temp_setpoint" >
+               <description>Party temperature.</description>
+               <telegram address="2308" type="byte"/>
+         </channel>               
+         <channel id="room_temp" >
+               <description>Room temperature.</description>
+               <telegram address="2306" type="byte"/>
+         </channel>
+         <channel id="save_temp_setpoint" >
+               <description>Save temperature.</description>
+               <telegram address="2307" type="byte"/>
+         </channel>
+          <channel id="gradient">
+               <description>The gradient relativ to outsite temperature.</description>
+               <telegram  address="2305" type="byte" divider="10"/>
+          </channel>
+          <channel id="niveau" >
+               <description>The niveau relativ to outsite temperature.</description>
+               <telegram address="2304" type="byte"/>
+         </channel>
+     </thing>
+
+    <!--# Circuit 2 -->
+    <thing type="circuit" id="circuit2">
+          <description>Heading Circuit of the second Floor.</description>
+          <channel id="flowtemperature" >
+               <description>Flow temperature</description>
+               <telegram address="3900" type="short" divider="10"/>
+          </channel>
+          <channel id="pump">
+               <description></description>
+               <telegram address="3906" type="boolean" />
+          </channel>
+           <channel id="operationmode" >
+               <description>Operation mode (0,1,2,3,4).</description>
+               <telegram address="3301" type="byte"/>
+         </channel>
+          <channel id="savemode">
+               <description>The savemode.</description>
+               <telegram  address="3302" type="boolean"/>
+          </channel>
+          <channel id="partymode" >
+               <description>Partymode.</description>
+               <telegram address="3303" type="boolean"/>
+         </channel>
+         <channel id="party_temp_setpoint" >
+               <description>Party temperature.</description>
+               <telegram address="3308" type="byte"/>
+         </channel>               
+         <channel id="room_temp" >
+               <description>Room temperature.</description>
+               <telegram address="3306" type="byte"/>
+         </channel>
+         <channel id="save_temp_setpoint" >
+               <description>Save temperature.</description>
+               <telegram address="3307" type="byte"/>
+         </channel>
+          <channel id="gradient">
+               <description>The gradient relativ to outsite temperature.</description>
+               <telegram  address="3305" type="byte" divider="10"/>
+          </channel>
+          <channel id="niveau" >
+               <description>The niveau relativ to outsite temperature.</description>
+               <telegram address="3304" type="byte"/>
+          </channel>
+      </thing>
+
+</optolink>
